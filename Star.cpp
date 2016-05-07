@@ -5,20 +5,6 @@
 #include "commons.h"
 using namespace std; 
 
-/*
-string chipID; 
-	vector<double> xcenter; 
-	vector<double> ycenter; 
-	vector<double> ra; 
-	vector<double> dec; 
-	vector<double> starID; 
-	vector<double> mag; 
-	vector<string> type; 
-
-	vector<double> e; 
-	vector<double> e1; 
-	vector<double> e2; 
-	vector<double> PA;  */
 
 Star::Star(string chipID, string sexFileName):chipID(chipID) {
 
@@ -45,19 +31,19 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 	}
 }
 
-
 void Star::printStarListInfo() {
 	cout << "************************" << endl; 
 	cout << "chipID:   " << chipID << endl; 
 	cout << "numObject:" << starID.size() << endl; 
 	cout << "************************" << endl; 
+	/*
 	for(int i=0 ; i< starID.size(); ++i) {
 
 		cout << starID[i] << "\t" << xcenter[i] << endl; 
 		
 
 	}
-
+	*/
 
 
 }

@@ -26,8 +26,26 @@ void printerror( int status)
 }
 
 
-void getEllipticity(int* stampRegion, const Image* dataImage, double background) {
-	clock_t begin = clock(); 
+
+/***************************
+Function:       getEllipticity
+Description:    
+Arguments:      (1): stampRegion [leftx, lefty, rightx, righty]; 
+                (2): Image pointer to the dataImage; 
+                (3): background value; 
+Returns:        v[0] = e1; 
+                v[1] = e2; 
+                v[2] = e; 
+                v[3] = Postion angle  [-pi, pi]; 
+                v[4] = flux; 
+                v[5] = rms ; 
+                v[6] = number of interations; 
+Notes:          
+****************************/
+vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, double background) {
+
+    vector<double> ret(7, 0); 
+	//clock_t begin = clock(); 
 	int x1 = stampRegion[0]; 
 	int y1 = stampRegion[1]; 
 	int x2 = stampRegion[2]; 
@@ -67,7 +85,7 @@ void getEllipticity(int* stampRegion, const Image* dataImage, double background)
     double alphaxy = covxy*sqrt(2.0); 
     int nTrials = 100;
 
-    double e1 = 0, e2 = 0, weight = 0, flux = 0, ellip = 0, pa = 0, rms = 0, real_pa =0; 
+    double e1 = 0, e2 = 0, weight = 0, flux = 0, ellip = 0, pa = 0, rms = 0; 
     int n = 0; 
     for (n=0 ; n<nTrials; ++n ) {
 		t1 =0,  t2 =0, t3 =0, t4 = 0, t5 = 0, t6 =0, t7 = 0; 
@@ -103,10 +121,9 @@ void getEllipticity(int* stampRegion, const Image* dataImage, double background)
         e1=(resulty-resultx)/(resultx+resulty); 
         e2=(2.0*covxy)/(resultx+resulty); 
         ellip= sqrt(e1*e1+e2*e2); 
-        //pa=0.5*math.degrees(math.atan(e2/e1))-90
 
-        real_pa = 0.5* atan2(e2, e1) * 180/M_PI; 
-        pa = 0.5* real_pa - 90; 
+        pa = 0.5* atan2(e2, e1) * 180/M_PI;     //  [-pi, pi]; 
+        //pa = 0.5* real_pa ; 
         if (resultx<1.0e-6 or resulty<1.0e-6)
             break; 
 
@@ -125,9 +142,19 @@ void getEllipticity(int* stampRegion, const Image* dataImage, double background)
     cout <<" RMS = " << rms << endl ; 
     cout << "iterations: == " << n << endl; 
 
-  clock_t end = clock();
-  double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  cout << "Time used: " << elapsed_secs << endl; 
+  //clock_t end = clock();
+  //double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  //cout << "Time used: " << elapsed_secs << endl; 
+
+  ret[0] = e1; 
+  ret[1] = e2; 
+  ret[2] = ellip; 
+  ret[3] = pa; 
+  ret[4] = flux; 
+  ret[5] = rms ; 
+  ret[6] = n; 
+
+  return ret; 
 }
 
 
@@ -149,6 +176,20 @@ vector<string> splitString(string s) {
 	return items;
 }
 
+
+int getMin(vector<int> * const v) {
+    int min = 1000000; 
+    for(int i=0; i<v->size(); ++i) 
+        if(v->at(i)< min) min = v->at(i); 
+    return min; 
+}
+
+int getMax(vector<int> * const v) {
+    int max = 0; 
+    for(int i=0; i<v->size(); ++i) 
+        if(v->at(i)> max) max = v->at(i); 
+    return max; 
+}
 
 
 

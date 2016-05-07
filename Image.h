@@ -4,8 +4,27 @@
 #include <string> 
 #include <map>
 #include "fitsio.h"
+//#include "commons.h"
 
 using namespace std; 
+
+struct Shape {
+
+	// define the shape of the stamps; 
+	string name; 
+	double centerX; 
+	double centerY; 
+	double xLength; 
+	double yLength; 
+	double rotation; 
+	Shape(string name, double centerX, double centerY, double xLength, double yLength, double rotation): 
+			name(name), centerX(centerX), centerY(centerY), xLength(xLength), yLength(yLength), rotation(rotation) {
+			}
+}; 
+
+
+
+
 class Image {
 
 public: 
@@ -34,7 +53,9 @@ public:
 	void writeToFile(string imgFileName);
 	void printImageInfo(int x1=0, int y1=0, int x2=0, int y2=0, int header=0) ;
 	void cropStamp(int x1, int y1, int x2, int y2,  string stampFileName); 
+	void cropStamp(Shape* shape, string stampFileName); 
 	void updateHeader(fitsfile *fptr); 
+
 
 
 

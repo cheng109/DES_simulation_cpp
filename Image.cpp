@@ -1,11 +1,13 @@
 
+#include <ctime>
 #include <iostream> 
 #include <iomanip>
-
+#include <cmath>
 #include "Image.h"
 #include "fitsio.h"
 #include "commons.h"
 #define buffsize 100000
+
 
 using namespace std; 
 
@@ -299,4 +301,98 @@ void Image::cropStamp(int x1, int y1, int x2, int y2, string stampFileName) {
 
 }
 
+void Image::cropStamp(Shape* shape, string stampFileName) {
+
+	vector<double> stampData;
+	vector<int> stampX; 
+	vector<int> stampY;  
+	
+	double winSize; 
+	if(shape->name=="box") {
+		double centerX 	= shape->centerX; 
+		double centerY 	= shape->centerY; 
+		double a		= shape->xLength; 
+		double b		= shape->yLength; 
+		double A 		= shape->rotation ;  // rotation angle; 
+		winSize  = (a>b)? 1.414*a: 1.414*b; 
+		int startX = ((centerX - winSize)>0		)?  int(centerX-winSize): 0; 
+		int endX   = ((centerX + winSize)>naxis1)? 	naxis1 				: int(centerX+winSize); 
+		int startY = ((centerY - winSize)>0		)?  int(centerY-winSize): 0; 
+		int endY   = ((centerY + winSize)>naxis2)? 	naxis2 				: int(centerY+winSize); 
+
+		for(int i=startX; i<endX; ++i) {
+			for (int j=startY; j<endY; ++j) {
+				int dx= i - centerX;
+				int dy= j - centerY;
+
+				double newX = (dx*cos(A) + dy*sin(A))/a; 
+				double newY = (dx*sin(A) - dy*cos(A))/b; 
+				if( newX <1 and newY<1 and newX >-1 and newY>-1) {
+					stampX.push_back(i-startX);   // new image frame; 
+					stampY.push_back(j-startY); 
+					stampData.push_back(data[j*naxis1 + i]) ; 
+				}
+			}
+		}	
+	}
+
+
+	else if(shape->name == "ellipse") {
+
+		double ellipseCenterX 	= shape->centerX; 
+		double ellipseCenterY 	= shape->centerY; 
+		double a				= shape->xLength; 
+		double b				= shape->yLength; 
+		double A 				= shape->rotation ;  // rotation angle; 
+		winSize  = (a>b)? a:b; 
+		int startX = ((ellipseCenterX-winSize)>0)?  int(ellipseCenterX-winSize):0; 
+		int endX = ((ellipseCenterX + winSize)>naxis1) ? naxis1 : int(ellipseCenterX+winSize); 
+		int startY = ((ellipseCenterY-winSize)>0)?  int(ellipseCenterY-winSize):0; 
+		int endY = ((ellipseCenterY + winSize)>naxis2) ? naxis2 : int(ellipseCenterY+winSize); 
+
+		for(int i=startX; i<endX; ++i) {
+			for (int j=startY; j<endY; ++j) {
+				int dx= i - ellipseCenterX;
+				int dy= j - ellipseCenterY;
+
+				double dr2 = ((dx*cos(A) + dy*sin(A))/a)*((dx*cos(A) + dy*sin(A))/a) 
+									+ ((dx*sin(A) - dy*cos(A))/b)*((dx*sin(A) - dy*cos(A))/b); 
+				if( dr2 < 1) {
+					stampX.push_back(i-startX);   // new image frame; 
+					stampY.push_back(j-startY); 
+					stampData.push_back(data[j*naxis1 + i]) ; 
+				}
+			}
+		}	
+
+	}
+
+	else{	
+		cout << "Stamp shape not supported yet!" << endl; 
+		exit(1); 
+	}
+
+	clock_t begin = clock(); 
+
+
+
+	int xMin = getMin(&stampX); 
+	int yMin = getMin(&stampY); 
+	int xnaxis = getMax(&stampX) - xMin	; 
+	int ynaxis = getMax(&stampY) - yMin ; 
+	
+
+	for (int i=0 ; i<stampX.size(); ++i) {
+		stampX[i] -= xMin; 
+		stampY[i] -= yMin; 
+	}
+
+	Image* stampImage= new Image(stampX, stampY, &stampData, xnaxis, ynaxis, bitpix); 
+	stampImage->headerDouble = headerDouble; 
+	stampImage->headerString = headerString; 
+	stampImage->writeToFile(stampFileName); 
+	delete stampImage; 
+
+
+}
 
