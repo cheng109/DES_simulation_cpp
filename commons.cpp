@@ -133,7 +133,7 @@ vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, d
         alphay=sqrt(resulty*2.0); 
         alphaxy=covxy*2.0; 
     }
-
+/*
     cout <<" e1 = " << e1 << endl ; 
     cout <<" e2 = " << e2 << endl ; 
     cout <<" e = " << ellip << endl ; 
@@ -141,7 +141,7 @@ vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, d
     cout <<" flux = " << flux << endl ; 
     cout <<" RMS = " << rms << endl ; 
     cout << "iterations: == " << n << endl; 
-
+*/
   //clock_t end = clock();
   //double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
   //cout << "Time used: " << elapsed_secs << endl; 

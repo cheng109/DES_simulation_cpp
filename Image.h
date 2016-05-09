@@ -52,8 +52,7 @@ public:
 	template <typename T> Image(vector<T> xpos, vector<T> ypos, vector<double> *briList, long naxis1, long naxis2, int bitpix); 
 	void writeToFile(string imgFileName);
 	void printImageInfo(int x1=0, int y1=0, int x2=0, int y2=0, int header=0) ;
-	void cropStamp(int x1, int y1, int x2, int y2,  string stampFileName); 
-	void cropStamp(Shape* shape, string stampFileName); 
+	void cropStamp(Shape* shape, string stampFileName, bool writeStamp); 
 	void updateHeader(fitsfile *fptr); 
 
 

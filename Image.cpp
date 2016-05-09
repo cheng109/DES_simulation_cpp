@@ -266,42 +266,8 @@ Image::Image(vector<T> xpos, vector<T> ypos, vector<double> *briList, long naxis
 	}
 }
 
-void Image::cropStamp(int x1, int y1, int x2, int y2, string stampFileName) {
-	x1 = (x1>0)?x1:0;
-	y1 = (y1>0)?y1:0;
-	x2 = (x2<naxis1)?x2:naxis1;
-	y2 = (y2<naxis2)?y2:naxis2;
 
-	long stampNaxis1 = x2-x1; 
-	long stampNaxis2 = y2-y1; 
-	
-
-	vector<double> stampData;
-	vector<int> stampX; 
-	vector<int> stampY;  
-	int xIndex = 0 ; 
-	int yIndex = 0 ; 
-	for (int y=y1; y<=y2; ++y) {
-		xIndex = 0; 
-		for(int x=x1; x<=x2; ++x) {
-			stampX.push_back(xIndex); 
-			stampY.push_back(yIndex); 
-			stampData.push_back(data[y*naxis1+x]) ; 
-			xIndex ++; 
-		}
-		yIndex ++; 
-
-	}
-
-	Image* stampImage= new Image(stampX, stampY, &stampData, stampNaxis1, stampNaxis2, bitpix); 
-	stampImage->headerDouble = headerDouble; 
-	stampImage->headerString = headerString; 
-	stampImage->writeToFile(stampFileName); 
-	delete stampImage; 
-
-}
-
-void Image::cropStamp(Shape* shape, string stampFileName) {
+void Image::cropStamp(Shape* shape, string stampFileName, bool writeStamp) {
 
 	vector<double> stampData;
 	vector<int> stampX; 
@@ -387,11 +353,15 @@ void Image::cropStamp(Shape* shape, string stampFileName) {
 		stampY[i] -= yMin; 
 	}
 
-	Image* stampImage= new Image(stampX, stampY, &stampData, xnaxis, ynaxis, bitpix); 
-	stampImage->headerDouble = headerDouble; 
-	stampImage->headerString = headerString; 
-	stampImage->writeToFile(stampFileName); 
-	delete stampImage; 
+
+	if (writeStamp==TRUE) {
+		Image* stampImage= new Image(stampX, stampY, &stampData, xnaxis, ynaxis, bitpix); 
+		stampImage->headerDouble = headerDouble; 
+		stampImage->headerString = headerString; 
+		stampImage->writeToFile(stampFileName); 
+		delete stampImage; 
+
+	}	
 
 
 }

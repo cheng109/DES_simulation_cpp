@@ -8,19 +8,11 @@
 
 using namespace std; 
 
-class Stamp {
-
-	Stamp(); 
-	~Stamp(); 
-
-
-
-}; 
-
 void printerror( int status); 
 vector<double> getEllipticity(int*  stampRegion, const Image* dataImage, double background); 
 vector<string> splitString(string s); 
 int getMin(vector<int> * const  v); 
 int getMax(vector<int> * const  v); 
+
 
 #endif
