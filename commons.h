@@ -32,6 +32,8 @@ vector<double> getEllipticity(int*  stampRegion, const Image* dataImage, double 
 vector<string> splitString(string s); 
 int getMin(vector<int> * const  v); 
 int getMax(vector<int> * const  v); 
+double convHMS(string RA) ; 
+double convDMS(string DEC) ; 
 
 
 #endif

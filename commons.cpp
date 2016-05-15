@@ -9,6 +9,7 @@
 #include "commons.h"
 #include <fstream>
 #include <sstream>
+#include <string>
 using namespace std; 
 
 
@@ -191,6 +192,56 @@ int getMax(vector<int> * const v) {
     return max; 
 }
 
+
+double convHMS(string RA) {
+    stringstream ra(RA);
+    string temp; 
+    vector<string> items; 
+    while(getline(ra, temp, ':')) 
+        items.push_back(temp);    
+
+    if(items.size() != 3 ) {
+        cout << "HMS conversion error!" << endl; 
+        exit(1) ;
+    }
+    int     hh = stoi(items[0]); 
+    int     mm = stoi(items[1]); 
+    double  ss = stod(items[2]); 
+
+    return  hh*15.0 +  mm/4.0 + ss/240.0 ; 
+}
+
+double convDMS(string DEC) {
+    stringstream dec(DEC);
+    string temp; 
+    vector<string> items; 
+    while(getline(dec, temp, ':')) 
+        items.push_back(temp);    
+
+    if(items.size() != 3 ) {
+        cout << "HMS conversion error!" << endl; 
+        exit(1) ;
+    }
+    char Csign = items[0][0] ; 
+    double sign = 0; 
+    int deg, arcmin; 
+    double arcsec; 
+    if(Csign=='-')  {
+        sign = -1.0; 
+        deg = stoi(items[0].substr(1)); 
+    }
+    else if (Csign =='+') {
+        sign = 1.0 ; 
+        deg = stoi(items[0].substr(1)); 
+    }
+    else {
+        sign = 1.0; 
+        deg = stod(items[0]); 
+    }
+    
+    return sign*(deg+(arcmin*5.0/3.0+arcsec*5.0/180.0)/100.0); 
+
+}
 
 
 #endif 
