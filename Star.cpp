@@ -18,7 +18,7 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 	numGood = 0; 
 	numMatch = 0; 
 	while (getline(sexFile, line)) {
-		if(line[0]!='#') {
+		if(line.size() > 0 and line[0]!='#') {
 			vector<string> items = splitString(line);
 			if (items.size() >2) {
 

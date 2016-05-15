@@ -3,7 +3,10 @@
 #include "commons.h"
 #include <stdlib.h>
 #include "Star.h"
+#include "des_catalogGenerate.h"
 using namespace std; 
+
+
 int main() {
 
 	//string imageName = "pa_90.fits"; 
@@ -37,10 +40,13 @@ if(0) {
 	} 
 }
 
+
+string fileNameTail = "_x_0.0_y_-1.0_z_0.0_phi_-216000_psi_0.0_theta_0.0_seeing_0.7.fits"; 
+
 if(0) {
 	for(int i=0; i<CHIPS.size(); ++i) {
 
-		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  "_x_0.5_y_-1.0_z_0.01_phi_108000_psi_0.0_theta_-40.0_seeing_0.7.fits";
+		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  fileNameTail;
 		if(!ifstream(simuImageName)) 
 			continue; 
 		string simuCatalogName = simuDIR + CHIPS[i] + "_simuCatalog.txt"; 
@@ -50,7 +56,8 @@ if(0) {
 	}
 }
 
-	for(int i=0; i<1; ++i) {
+/*
+	for(int i=0; i<CHIPS.size(); ++i) {
 		cout << CHIPS[i] << endl; 
 		string dataCatalogName = dataDIR + CHIPS[i] + "_dataCatalog.txt"; 
 		string simuCatalogName = simuDIR + CHIPS[i] + "_simuCatalog.txt"; 
@@ -58,7 +65,7 @@ if(0) {
 		if(!ifstream(dataCatalogName) or !ifstream(simuCatalogName)) 
 			continue; 
 		string dataImageName = dataDIR + CHIPS[i] +  "_test_image.fits";
-		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  "_x_0.5_y_-1.0_z_0.01_phi_108000_psi_0.0_theta_-40.0_seeing_0.7.fits";
+		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  fileNameTail;
 
 		Image* dataImage = new Image(dataImageName); 
 		Image* simuImage = new Image(simuImageName); 
@@ -72,6 +79,11 @@ if(0) {
 		dataStarList->writeTxt(simuStarList, simuDIR + CHIPS[i] + "_output_test.txt");  // data on the left; simu on the right; 
 		delete dataImage, simuImage, dataStarList, simuStarList;  
 	}
+
+*/
+
+
+	catalogGenerator(); 
 
 }
 

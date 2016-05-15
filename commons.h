@@ -6,6 +6,25 @@
 #include "Image.h"
 
 
+
+class Conf{
+	double x; 
+	double y; 
+	double z; 
+	double psi; 
+	double phi; 
+	double theta; 
+	double seeing; 
+
+	Conf(); 
+	Conf(double x, double y, double z, double psi, double phi, double theta, double seeing): 
+			x(x), y(y), z(z), phi(phi), psi(psi), theta(theta), seeing(seeing) {
+
+			} 
+
+}; 
+
+
 using namespace std; 
 
 void printerror( int status); 

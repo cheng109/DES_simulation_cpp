@@ -1,0 +1,77 @@
+## Coarse Correction
+##  (1) CHIP
+##	(2)	SHIFT_X
+##	(2)	SHIFT_Y
+##	(2)	SHIFT_Z	
+##	(2) Coarse_DEC
+##	(3) Coarse_RA
+## Coarse correction: 
+#
+N1	coarse	-31.0	146.0
+N2	coarse	-46.0	124.0
+N3	coarse	-62.0	96.0
+N4	coarse	-76.0   54.0
+N5	coarse	-94.0   24.0
+N6	coarse	-107.0   0.0
+N7	coarse	-124.0   -22.0
+N8	coarse	-34.0	113.0
+N9	coarse	-49.0	78.0
+N10	coarse	-64.0	48.0
+N11	coarse	-81.0	22.0
+N12	coarse	-96.0	-8.0
+N13	coarse	-111.0	-41.0
+N14	coarse	-28.0	81.0
+N15	coarse	-44.0	36.0
+N16	coarse	-60.0	14.0
+N17	coarse	-77.0	-18.0
+N18	coarse	-92.0	-41.0
+N19	coarse	-107.0	-71.0
+N20	coarse	-33.0	43.0
+N21	coarse	-47.0	8.0
+N22	coarse	-62.0	-22.0
+N23	coarse	-81.0	-52.0
+N24	coarse	-95.0	-86.0
+N25	coarse	-35.0	-1.0
+N26	coarse	-50.0	-45.0
+N27	coarse	-67.0	-73.0
+N28	coarse	-82.0	-103.0
+N29	coarse	-39.0	-47.0
+N30	coarse  missing
+N31 coarse	-70.0	-107.0
+#
+N22	coarse	-67.0   -46.0
+#
+#
+#
+S1	coarse	-37.0	184.0
+S2	coarse	-48.0	154.0
+S3	coarse	-66.0	128.0
+S4	coarse	-79.0   96.0
+S5	coarse	-96.0   66.0
+S6	coarse	-112.0   44.0
+S7  coarse	missing
+S8  coarse  -46.0	204.0
+S9  coarse  -61.0	165.0
+S10 coarse  -75.0	132.0
+S11 coarse  -90.0	102.0
+S12 coarse  -107.0	81.0
+S13 coarse  -123.0	51.0
+S14 coarse  -53.0	227.0
+S15 coarse  -65.0	192.0
+S16 coarse  -78.0	163.0
+S17 coarse  -97.0	133.0
+S18 coarse  -110.0	103.0
+S19 coarse  -128.0	78.0
+S20 coarse  -64.0	239.0
+S21 coarse  -77.0	209.0
+S22	coarse	-93.0   174.0
+S23	coarse	-107.0   143.0
+S24	coarse	-125.0   115.0
+S25 coarse  -74.0	249.0
+S26 coarse  -87.0	220.0
+S27 coarse  -102.0	190.0
+S28 coarse  -119.0	156.0
+S29 coarse  -88.0	261.0
+S30 coarse  -106.0	226.0
+S31 coarse  -121.0	196.0
+
