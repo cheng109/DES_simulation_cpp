@@ -82,8 +82,28 @@ if(0) {
 
 */
 
+	 // shift = {"x": 0.5, "y": -1.0, "z": 0.01}
+    // tilt = {"phi":  108000, "psi": 0.0, "theta": -40.0} 
 
-	catalogGenerator("N10"); 
+
+
+	double x = 0.5; 
+	double y = -1.0; 
+	double z = 0.01; 
+	double phi = 108000; 
+	double psi = 0.0; 
+	double theta = -40.0; 
+	double seeing = 0.7; 
+	double rotation = 270.0; 
+	double magCorrection = 4.0; 
+
+	Conf* conf = new Conf(chipID, x, y, z, phi, psi, theta, seeing, magCorrection, rotation); 
+	conf->updateShiftCorrection(); 
+
+	catalogGenerator(conf); 
+
+
+	delete conf; 
 
 }
 

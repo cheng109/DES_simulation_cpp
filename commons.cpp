@@ -225,8 +225,8 @@ double convDMS(string DEC) {
     }
     char Csign = items[0][0] ; 
     double sign = 0; 
-    int deg, arcmin; 
-    double arcsec; 
+    int deg ; 
+
     if(Csign=='-')  {
         sign = -1.0; 
         deg = stoi(items[0].substr(1)); 
@@ -237,9 +237,11 @@ double convDMS(string DEC) {
     }
     else {
         sign = 1.0; 
-        deg = stod(items[0]); 
+        deg = stoi(items[0]); 
     }
     
+    int arcmin = stoi(items[1]); 
+    double arcsec = stod(items[2]); 
     return sign*(deg+(arcmin*5.0/3.0+arcsec*5.0/180.0)/100.0); 
 
 }
@@ -252,7 +254,7 @@ double convDMS(string DEC) {
 void Conf::updateShiftCorrection() {
 
     vector<double> ret; 
-
+    double TOL = 1.0e-3; 
 
     double dDEC1 = -72.933*x - 0.3333 ; 
     double dRA1  = 240.47*y ; 
@@ -261,34 +263,40 @@ void Conf::updateShiftCorrection() {
     double dRA2  = 0;
     double dRotation = 0; 
 
-    if (phi==324000.0){
+
+    if (fabs(phi-324000.0)<TOL) {
         dDEC2 = -7.5435*theta -0.7778; 
     }
-    else if (phi==108000.0){
+    else if (fabs(phi-108000.0)<TOL) {
         dDEC2 = -3.8*theta; 
         dRA2 = -21.801*theta-2.1316; 
     }
-    else if (phi==216000.0) {
+    else if (fabs(phi-216000.0)<TOL) {
         dDEC2 = -6.5618*theta-0.4; 
         dRA2 = -12.598*theta -2.1316; 
     }
-    else if (phi==-108000.0) {
+    else if (fabs(phi+108000.0)<TOL) {
         dDEC2 = 3.7882*theta + 0.2; 
         dRA2 = -21.801*theta -2.1316 ; 
     }
-    else if (phi==-216000.0) {
+    else if (fabs(phi+216000.0)<TOL) {
         dDEC2 = 6.5618*theta + 0.4 ; 
         dRA2 = -12.598*theta -2.1316 ; 
     }
-    else if (phi==0.0) {
+    else if (fabs(phi-0.0)<TOL) {
         dRA2 = -24.958*theta -1.6667 ; 
     }
+    else {
+        cout << "Angle configuration error!" << endl; 
+        exit(1); 
+    } 
+
     dDEC_shift = dDEC1 + dDEC2; 
     dRA_shift  = dRA1 + dRA2; 
     dROT_shift = dRotation; 
 
-    dRA  = dRA_shift  + dRA_coarse; 
-    dDEC = dDEC_shift + dDEC_coarse; 
+    dRA  = (dRA_shift  + dRA_coarse)*0.27/3600; 
+    dDEC = (dDEC_shift + dDEC_coarse)*0.27/3600; 
     dROT = dROT_shift + dROT_coarse; 
 
 

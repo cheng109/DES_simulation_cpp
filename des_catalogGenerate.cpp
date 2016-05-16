@@ -8,33 +8,89 @@
 #include <vector>
 #include <cmath>
 #include "des_catalogGenerate.h"
+#include <stdlib.h>
+#include <time.h>
 using namespace std; 
 
 #define COEF_ARCSEC_TO_RAD 4.8481e-6
 
 
-void catalogGenerator(string chipID) {
+void catalogGenerator(Conf* conf) {
+
+   
+
+	
 
 
-
-	Conf* conf = new Conf(chipID, 0.5, -1.0, 0.01, 108000, 0.0, -40.0, 0.7, 270.0); 
-	conf->updateShiftCorrection(); 
 	//map<string, vector<double> > correctMap = parseConfigFile("conf.txt"); 
 	string dataDIR = "dataCatalog/"; 
 
-	string dataImageName = dataDIR + chipID +  "_test_image.fits";
-	string dataCatalogName = dataDIR + chipID + "_dataCatalog.txt"; 
+	string dataImageName = dataDIR + conf->chipID +  "_test_image.fits";
+	string dataCatalogName = dataDIR + conf->chipID + "_dataCatalog.txt"; 
 
-	Star *dataStarList = new Star(chipID, dataCatalogName); 
+	Star *dataStarList = new Star(conf->chipID, dataCatalogName); 
 
 
 	map<string, double> headerMap = getHeader(dataImageName);  // include 'AZ', 'TELRA', 'TELDEC'
 
 
-	writePhosimCommand("sample_command.txt", conf) ; 
-	wrtiePhosimCatalog("sample_catalog.txt", dataStarList, headerMap, conf); 
+	srand (time(NULL));
+	string suffix = to_string(int(1000000.0 + 9000000.0 * rand()/(RAND_MAX + 1.0))); 
 
-	delete conf; 
+
+	writePhosimCommand(conf->chipID + "_phosimCommand_ID_" + suffix, conf) ; 
+	wrtiePhosimCatalog(conf->chipID + "_phosimCatalog_ID_" + suffix, dataStarList, headerMap, conf); 
+	writePhosimRun	  ("run_sample.txt", suffix, conf); 
+	//delete conf; 
+
+}
+
+
+void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
+
+	string DestinationDIR = "output_fits"; 
+
+	ofstream file; 
+	file.open(runScriptName);
+	string chipID = conf->chipID; 
+	
+	
+	string workDirectory = chipID + "_work_ID_" + suffix ; 
+    string outputDirectory = chipID + "_output_ID_" + suffix ; 
+
+
+	string outputName = DestinationDIR + "/"+ "Images_" + chipID 
+                 + "_x_" + to_string(conf->x)
+                 + "_y_" + to_string(conf->y)
+                 + "_z_" + to_string(conf->z)
+                 + "_phi_" + to_string(conf->phi)
+                 + "_psi_" + to_string(conf->psi)
+                 + "_theta_" + to_string(conf->theta)
+                 + "_seeing_" + to_string(conf->seeing) 
+                 + ".fits" ; 
+
+
+
+    // write the run script; 
+    file 	<< "#!/bin/bash \n"
+    		<< "pwd=$(pwd) \n"
+    		<< "PHOSIM_PATH=/Users/cheng109/toberemoved/phosim/phosim_core/ \n"
+    		<< "mkdir $pwd/"+ workDirectory +" $pwd/" + outputDirectory + "\n"  // create 'work' and 'output' directories; 
+    		<< "cd $PHOSIM_PATH \n"
+    		<< "./phosim $pwd/" + chipID +"_phosimCatalog_ID_" + suffix 
+    			+ " -c $pwd/" + chipID +"_phosimCommand_ID_" + suffix
+    			+ " -e 0 -w $pwd/"+ workDirectory + " -o $pwd/" + outputDirectory
+                + " -i deCam" 
+                + " -s " +chipID 
+                + " && gunzip -f $pwd/" + outputDirectory + "/*"+chipID +"*.gz \n"
+            << "cp $pwd/" + outputDirectory+ "/*"+chipID +"*.fits " + outputName + "\n" 
+            << "rm -rf $pwd/" +  workDirectory   				 + "\n" 
+            << "rm -rf $pwd/" +  outputDirectory 				 + "\n" 
+			<< "rm -rf $pwd/" +  chipID + "_phosimCatalog_ID_"  + suffix + "\n" 
+            << "rm -rf $pwd/" +  chipID + "_phosimCommand_ID_"  + suffix + "\n" ; 
+    file.close(); 
+    string chmodCMD = "chmod +x " + runScriptName;  
+    int status = system(chmodCMD.c_str()); 
 
 }
 
@@ -69,7 +125,7 @@ void wrtiePhosimCatalog(string phosimCatalogName, Star* dataStarList, map<string
 			<<"SIM_NSNAP 1 \n" ; 
 
 
-	double magCorrection = 2.0 ; 
+	double magCorrection = 4.0 ; 
 	for (int i=0; i<dataStarList->numObj; ++i) {
 
 		file 	<< "object " 
@@ -102,7 +158,7 @@ void wrtiePhosimCatalog(string phosimCatalogName, Star* dataStarList, map<string
 void writePhosimCommand(string phosimCommandName, Conf* conf) {
 	ofstream file; 
 	file.open(phosimCommandName) ; 
-	file << "zenith_v 1000.0\n"
+	file    << "zenith_v 1000.0\n"
             << "raydensity 0.0\n"
             << "clearperturbations\n"
             << "overdepbias -40.0\n"
@@ -124,7 +180,6 @@ void writePhosimCommand(string phosimCommandName, Conf* conf) {
 map<string, double> getHeader(string imageName) {
 	int status = 0 ; 
 	fitsfile *fptr; 
-	cout << imageName << endl; 
 	if ( fits_open_file(&fptr, imageName.c_str(), READONLY, &status) )
 		printerror( status );
 	char* comment = NULL ; 
@@ -146,7 +201,6 @@ map<string, double> getHeader(string imageName) {
 	for (auto keyword : keywordDouble) {
 		int num = fits_read_key(fptr, TDOUBLE, keyword.c_str(), &value,comment, &status); 
 		header[keyword] = value;  
-		cout << keyword << "\t" << value << endl; 
 	}
 
 	int num1 = fits_read_key(fptr, TSTRING, "TELDEC", dec_str,comment, &status);
@@ -188,8 +242,8 @@ map<string, vector<double> > parseConfigFile(string configFileName) {
 }
 
 
-Conf::Conf(string chipID, double x, double y, double z, double psi, double phi, double theta, double seeing, double rotation): 
-            chipID(chipID), x(x), y(y), z(z), phi(phi), psi(psi), theta(theta), seeing(seeing), rotation(rotation) {
+Conf::Conf(string chipID, double x, double y, double z, double phi, double psi, double theta, double seeing, double magCorrection,  double rotation): 
+            chipID(chipID), x(x), y(y), z(z), phi(phi), psi(psi), theta(theta), seeing(seeing), magCorrection(magCorrection), rotation(rotation) {
 
         coarseCorrectMap = parseConfigFile("conf.txt"); 
         dDEC_coarse = coarseCorrectMap[chipID][0]; 

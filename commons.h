@@ -33,10 +33,12 @@ public:
 	double dRA; 
 	double dROT; 
 
+
+	double magCorrection; 
 	map<string, vector<double> > coarseCorrectMap; 
 
 	Conf(); 
-	Conf(string chipID, double x, double y, double z, double psi, double phi, double theta, double seeing, double rotation); 
+	Conf(string chipID, double x, double y, double z, double psi, double phi, double theta, double seeing, double magCorrection, double rotation); 
 	void updateShiftCorrection(); 
 }; 
 
