@@ -13,8 +13,9 @@ public:
 	double x; 
 	double y; 
 	double z; 
-	double psi; 
+	 
 	double phi; 
+	double psi;
 	double theta; 
 	double seeing; 
 	double rotation; 

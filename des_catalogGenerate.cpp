@@ -83,14 +83,14 @@ void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
                 + " -i deCam" 
                 + " -s " +chipID 
                 + " && gunzip -f $pwd/" + outputDirectory + "/*"+chipID +"*.gz \n"
-            << "cp $pwd/" + outputDirectory+ "/*"+chipID +"*.fits " + outputName + "\n" 
+            << "cp $pwd/" + outputDirectory+ "/*"+chipID +"*.fits " + "$pwd/" + outputName + "\n" 
             << "rm -rf $pwd/" +  workDirectory   				 + "\n" 
             << "rm -rf $pwd/" +  outputDirectory 				 + "\n" 
 			<< "rm -rf $pwd/" +  chipID + "_phosimCatalog_ID_"  + suffix + "\n" 
             << "rm -rf $pwd/" +  chipID + "_phosimCommand_ID_"  + suffix + "\n" ; 
     file.close(); 
     string chmodCMD = "chmod +x " + runScriptName;  
-    int status = system(chmodCMD.c_str()); 
+    system(chmodCMD.c_str()); 
 
 }
 
@@ -199,12 +199,12 @@ map<string, double> getHeader(string imageName) {
 	keywordDouble.push_back("ZD");  
 	keywordDouble.push_back("EXPTIME");    // seconds ; double 
 	for (auto keyword : keywordDouble) {
-		int num = fits_read_key(fptr, TDOUBLE, keyword.c_str(), &value,comment, &status); 
+		fits_read_key(fptr, TDOUBLE, keyword.c_str(), &value,comment, &status); 
 		header[keyword] = value;  
 	}
 
-	int num1 = fits_read_key(fptr, TSTRING, "TELDEC", dec_str,comment, &status);
-	int num2 = fits_read_key(fptr, TSTRING, "TELRA" , ra_str ,comment, &status);
+	fits_read_key(fptr, TSTRING, "TELDEC", dec_str,comment, &status);
+	fits_read_key(fptr, TSTRING, "TELRA" , ra_str ,comment, &status);
 	
 	header["TELDEC"] = convDMS(dec_str);  
 	header["TELRA"]  = convHMS(ra_str) ; 
@@ -214,8 +214,6 @@ map<string, double> getHeader(string imageName) {
 	return header; 
 
 }
-
-
 
 
 map<string, vector<double> > parseConfigFile(string configFileName) {
