@@ -22,35 +22,49 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 			vector<string> items = splitString(line);
 			if (items.size() >2) {
 
-				ID.push_back(stoi(items[0])); 
-				mag.push_back(stod(items[1])); 
-				xcenter.push_back(stod(items[2])); 
-				ycenter.push_back(stod(items[3])); 
-				xworld.push_back(stod(items[4])); 
-				yworld.push_back(stod(items[5])); 
-
-				fwhm.push_back(stod(items[6])); 				
-				star_class.push_back(stod(items[7])); 
-				background.push_back(stod(items[8])); 
-
+				ID.			push_back(stoi(items[0])); 
+				mag.		push_back(stod(items[1])); 
+				xcenter.	push_back(stod(items[2])); 
+				ycenter.	push_back(stod(items[3])); 
+				xworld.		push_back(stod(items[4])); 
+				yworld.		push_back(stod(items[5])); 
+				fwhm.		push_back(stod(items[6])); 				
+				star_class.	push_back(stod(items[7])); 
+				background.	push_back(stod(items[8])); 
+				sed.		push_back("../sky/sed_flat.txt"); 
 				numObj ++;
 			}
 		}
 
 	}
-	e.resize(numObj); 
-	e1.resize(numObj); 
-	e2.resize(numObj); 	
-	PA.resize(numObj); 
-	matchIndex.resize(numObj, -1); 
-	good.resize(numObj); 
-	type.resize(numObj); 
+	e.			resize(numObj); 
+	e1.			resize(numObj); 
+	e2.			resize(numObj); 	
+	PA.			resize(numObj); 
+	good.		resize(numObj); 
+	type.		resize(numObj); 
+	z.			resize(numObj, 0);
+	gamma1.		resize(numObj, 0);
+	gamma2.		resize(numObj, 0);
+	mu.			resize(numObj, 0);
+	delta_ra.	resize(numObj, 0);
+	delta_dec.	resize(numObj, 0);
+	gauss_sigma.resize(numObj, 0); 
+	matchIndex.	resize(numObj, -1); 
+	type_str.	resize(numObj); 
+
+
 	// update Type; 
 	for (int i=0; i<type.size(); ++i) {
 		if(mag[i] < MAG_THRESHOLD and star_class[i] > CLASSIFICATION_THRESHOLD )   {
 			type[i] = STAR;     // '1' indicate star; 
+			type_str[i] = "point"; 
 			numStar ++; 
 		}
+		else {
+			type_str[i] = "gauss"; 
+
+		} 
 	}
 }
 

@@ -6,4 +6,8 @@
 
 map<string, double> getHeader(string imageName) ; 
 map<string, vector<double>> parseConfigFile(string configFileName); 
-void catalogGenerator() ; 
+void writePhosimCommand(string phosimCommandName, Conf* conf) ; 
+void wrtiePhosimCatalog(string phosimCatalogName, Star* dataStarList, map<string, double> &headerMap,Conf* conf); 
+
+
+void catalogGenerator(string chipID) ; 

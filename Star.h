@@ -44,6 +44,19 @@ public:
 	vector<double> background; 
 	vector<double> matchIndex; 
 
+
+	// not so useful; 
+	vector<string> sed; 
+	vector<double> z; 
+	vector<double> gamma1; 
+	vector<double> gamma2; 
+	vector<double> mu; 
+	vector<double> delta_ra; 
+	vector<double> delta_dec; 
+	vector<double> gauss_sigma; 
+	vector<string> type_str; 
+
+
 public: 
 	Star() ; 
 	Star(string chipID, string sexFileName) ; 

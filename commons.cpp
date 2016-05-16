@@ -7,6 +7,7 @@
 #include "Image.h"
 #include <ctime> 
 #include "commons.h"
+//#include "des_catalogGenerate.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -242,6 +243,60 @@ double convDMS(string DEC) {
     return sign*(deg+(arcmin*5.0/3.0+arcsec*5.0/180.0)/100.0); 
 
 }
+
+
+
+
+
+
+void Conf::updateShiftCorrection() {
+
+    vector<double> ret; 
+
+
+    double dDEC1 = -72.933*x - 0.3333 ; 
+    double dRA1  = 240.47*y ; 
+
+    double dDEC2 = 0; 
+    double dRA2  = 0;
+    double dRotation = 0; 
+
+    if (phi==324000.0){
+        dDEC2 = -7.5435*theta -0.7778; 
+    }
+    else if (phi==108000.0){
+        dDEC2 = -3.8*theta; 
+        dRA2 = -21.801*theta-2.1316; 
+    }
+    else if (phi==216000.0) {
+        dDEC2 = -6.5618*theta-0.4; 
+        dRA2 = -12.598*theta -2.1316; 
+    }
+    else if (phi==-108000.0) {
+        dDEC2 = 3.7882*theta + 0.2; 
+        dRA2 = -21.801*theta -2.1316 ; 
+    }
+    else if (phi==-216000.0) {
+        dDEC2 = 6.5618*theta + 0.4 ; 
+        dRA2 = -12.598*theta -2.1316 ; 
+    }
+    else if (phi==0.0) {
+        dRA2 = -24.958*theta -1.6667 ; 
+    }
+    dDEC_shift = dDEC1 + dDEC2; 
+    dRA_shift  = dRA1 + dRA2; 
+    dROT_shift = dRotation; 
+
+    dRA  = dRA_shift  + dRA_coarse; 
+    dDEC = dDEC_shift + dDEC_coarse; 
+    dROT = dROT_shift + dROT_coarse; 
+
+
+
+}
+
+
+
 
 
 #endif 

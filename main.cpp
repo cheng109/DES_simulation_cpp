@@ -83,7 +83,7 @@ if(0) {
 */
 
 
-	catalogGenerator(); 
+	catalogGenerator("N10"); 
 
 }
 
