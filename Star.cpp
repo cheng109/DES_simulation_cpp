@@ -17,6 +17,7 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 	numStar = 0; 
 	numGood = 0; 
 	numMatch = 0; 
+
 	while (getline(sexFile, line)) {
 		if(line.size() > 0 and line[0]!='#') {
 			vector<string> items = splitString(line);
@@ -68,26 +69,26 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 	}
 }
 
-void Star::matchObj(Star* starList) {
+void Star::matchObj(Star& starList) {
 	// update 'matchIndex' for both starList; 
 	// match all objects;
 	double tol = 15 ; // unit: pixel 
 	for(int i=0; i<numObj; ++i) {
-		for (int j=0; j<starList->numObj ; ++j) {
-			if( starList->matchIndex[j] == -1 and starList->type[i] == this->type[i]) {
+		for (int j=0; j<starList.numObj ; ++j) {
+			if( starList.matchIndex[j] == -1 and starList.type[i] == this->type[i]) {
 
-				double dx = starList->xcenter[j] - xcenter[i]; 
-				double dy = starList->ycenter[j] - ycenter[i]; 
+				double dx = starList.xcenter[j] - xcenter[i]; 
+				double dy = starList.ycenter[j] - ycenter[i]; 
 				double dr2 = dx*dx + dy*dy; 
 				//cout << "dr2: " << dr2 << endl; 
 				if (dr2 < tol*tol) {
 
 					this->matchIndex[i] = j ;
-					starList->matchIndex[j] = i; 
-					if (starList->type[i]== STAR) {
+					starList.matchIndex[j] = i; 
+					if (starList.type[i]== STAR) {
 
 						this->good[i] 	  = 1; 
-						starList->good[i] = 1; 
+						starList.good[i] = 1; 
 					}
 				}
 
@@ -96,17 +97,17 @@ void Star::matchObj(Star* starList) {
 		numGood += this->good[i] ; 
 
 	}
-	starList->numGood = this->numGood; 
+	starList.numGood = this->numGood; 
 
 	for(int i=0; i<numObj; ++i) {
 		if(this->matchIndex[i]!=-1) 
 			this->numMatch ++ ; 	
 	
 	}
-	starList->numMatch = this->numMatch; 
+	starList.numMatch = this->numMatch; 
 }
 
-void Star::updateEllipticity(Image* image) {
+void Star::updateEllipticity(Image& image) {
 	/*
 	Returns:    v[0] = e1; 
                 v[1] = e2; 
@@ -142,7 +143,7 @@ void Star::updateEllipticity(Image* image) {
 }
 
 
-void Star::writeTxt(Star* starList, string outFileName) {
+void Star::writeTxt(Star& starList, string outFileName) {
 
 	// writeOut only 'good' stars; 
 	// 'this' on the left and 'starList' on the right; 
@@ -160,14 +161,14 @@ void Star::writeTxt(Star* starList, string outFileName) {
 					<< to_string(this->yworld[i]) + "\t" ; 
 
 
-			outFile << to_string(starList->e[matchIndex[i]]) + "\t"  // C8
-					<< to_string(starList->PA[matchIndex[i]]) + "\t" 
-					<< to_string(starList->e1[matchIndex[i]]) + "\t" 
-					<< to_string(starList->e2[matchIndex[i]]) + "\t" 
-					<< to_string(starList->xcenter[matchIndex[i]]) + "\t" 
-					<< to_string(starList->ycenter[matchIndex[i]]) + "\t" 
-					<< to_string(starList->xworld[matchIndex[i]]) + "\t" 
-					<< to_string(starList->yworld[matchIndex[i]]) + "\t" ; 
+			outFile << to_string(starList.e[matchIndex[i]]) + "\t"  // C8
+					<< to_string(starList.PA[matchIndex[i]]) + "\t" 
+					<< to_string(starList.e1[matchIndex[i]]) + "\t" 
+					<< to_string(starList.e2[matchIndex[i]]) + "\t" 
+					<< to_string(starList.xcenter[matchIndex[i]]) + "\t" 
+					<< to_string(starList.ycenter[matchIndex[i]]) + "\t" 
+					<< to_string(starList.xworld[matchIndex[i]]) + "\t" 
+					<< to_string(starList.yworld[matchIndex[i]]) + "\t" ; 
 			outFile << endl; 
 		}
 

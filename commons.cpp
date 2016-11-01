@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 using namespace std; 
 
 
@@ -44,7 +45,7 @@ Returns:        v[0] = e1;
                 v[6] = number of interations; 
 Notes:          
 ****************************/
-vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, double background) {
+vector<double>  getEllipticity(int* stampRegion, const Image&  dataImage, double background) {
 
     vector<double> ret(7, 0); 
 	//clock_t begin = clock(); 
@@ -55,8 +56,8 @@ vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, d
 
 	x1 = (x1>0)?x1:0;
 	y1 = (y1>0)?y1:0;
-	x2 = (x2<dataImage->naxis1)?x2:dataImage->naxis1;
-	y2 = (y2<dataImage->naxis2)?y2:dataImage->naxis2;
+	x2 = (x2<dataImage.naxis1)?x2:dataImage.naxis1;
+	y2 = (y2<dataImage.naxis2)?y2:dataImage.naxis2;
 
 	int xLength = x2-x1; 
 	int yLength = y2-y1;  
@@ -65,8 +66,8 @@ vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, d
 	double noBackData; 
 	for(int i= 0; i< yLength; ++i ) {
 		for (int j=0; j<xLength; ++j) {
-			index = (i+y1)*dataImage->naxis1 + (j+x1); 
-			noBackData = dataImage->data[index] - background; 
+			index = (i+y1)*dataImage.naxis1 + (j+x1); 
+			noBackData = dataImage.data[index] - background; 
 			t1 += i* j * noBackData; 
 			t2 += noBackData; 
 			t3 +=  i * noBackData; 
@@ -94,9 +95,9 @@ vector<double>  getEllipticity(int* stampRegion, const Image* const dataImage, d
 
     	for(int i= 0; i< yLength; ++i ) {
 			for (int j=0; j<xLength; ++j) {
-				index = (i+y1)*dataImage->naxis1 + (j+x1); 
+				index = (i+y1)*dataImage.naxis1 + (j+x1); 
 				weight = (exp(-((i-medx)*(i-medx)/alphax/alphax-2.0*alphaxy/alphax/alphax/alphay/alphay*(i-medx)*(j-medy)+(j-medy)*(j-medy)/alphay/alphay)/2.0/(1-(alphaxy/alphax/alphay)*(alphaxy/alphax/alphay))))/(2*M_PI*alphax*alphay*sqrt(1-(alphaxy/alphax/alphay)*(alphaxy/alphax/alphay))); 
-				noBackData = dataImage->data[index] - background; 
+				noBackData = dataImage.data[index] - background; 
 
 				t1 += i*j*noBackData*weight; 
                 t2 += noBackData*weight; 
@@ -249,6 +250,56 @@ double convDMS(string DEC) {
 
 
 
+Conf::Conf (string configFileName){
+           //configFileName = "conf.txt"; 
+    ifstream configFile(configFileName.c_str());
+    string line;
+    //map<string, vector<double> > confMap; 
+    unordered_map<string, string> tempMp; 
+    while (getline(configFile, line)) {
+        //cout << line.size() << endl; 
+        if(line.size() > 0 and line.at(0)!='#') {
+            vector<string> items = splitString(line);
+            if (items.size() ==4) {
+
+                vector<double> shift(2); 
+                shift[0] = stod(items[2]); 
+                shift[1] = stod(items[3]); 
+                coarseCorrectMap[items[0]] = shift; 
+            }
+            if(items.size() ==2)  
+                tempMp[items[0]] = items[1]; 
+        }
+    }
+
+    //   Assign all the other configuration parameters; 
+    dataDIR = tempMp["dataDIR"] ; 
+    simuDIR= tempMp["simuDIR"] ; 
+    extractData = stoi(tempMp["extractData"]); 
+    extractSimu = stoi(tempMp["extractSimu"]); 
+    analyze     = stoi(tempMp["analyze"]) ; 
+
+    chipID = tempMp["chipID"] ; 
+    x = stod(tempMp["x"]); 
+    y = stod(tempMp["y"]); 
+    z = stod(tempMp["z"]); 
+    phi = stod(tempMp["phi"]); 
+    psi = stod(tempMp["psi"]) ; 
+    theta = stod(tempMp["theta"]); 
+    seeing = stod(tempMp["seeing"]); 
+    magCorrection = stod(tempMp["magCorrection"]); 
+    rotation = stod(tempMp["rotation"]);   
+    phosimFileDIR = tempMp["phosimFileDIR"]; 
+
+    configFile.close() ;      
+    } 
+
+
+
+
+
+
+
 
 
 void Conf::updateShiftCorrection() {
@@ -299,13 +350,7 @@ void Conf::updateShiftCorrection() {
     dDEC = (dDEC_shift + dDEC_coarse)*0.27/3600; 
     dROT = dROT_shift + dROT_coarse; 
 
-
-
 }
-
-
-
-
 
 #endif 
 

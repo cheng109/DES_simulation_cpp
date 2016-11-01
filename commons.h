@@ -1,6 +1,7 @@
 #ifndef COMMONS_H_
 #define COMMONS_H_
 #include <map> 
+#include <unordered_map> 
 #include <string> 
 #include <vector> 
 #include "Image.h"
@@ -36,10 +37,22 @@ public:
 
 
 	double magCorrection; 
-	map<string, vector<double> > coarseCorrectMap; 
+
+
+	/**************common configurations **************/; 
+	string dataDIR, simuDIR; 
+	unordered_map<string, vector<double>> coarseCorrectMap; 
+	bool extractData; 
+	bool extractSimu; 
+	bool analyze; 
+
+	string phosimFileDIR ; 
+	
+	/************** common configurations **************/
 
 	Conf(); 
-	Conf(string chipID, double x, double y, double z, double psi, double phi, double theta, double seeing, double magCorrection, double rotation); 
+	Conf(string fileName); 
+	void printConf(); 
 	void updateShiftCorrection(); 
 }; 
 
@@ -47,7 +60,7 @@ public:
 using namespace std; 
 
 void printerror( int status); 
-vector<double> getEllipticity(int*  stampRegion, const Image* dataImage, double background); 
+vector<double> getEllipticity(int*  stampRegion, const Image& dataImage, double background); 
 vector<string> splitString(string s); 
 int getMin(vector<int> * const  v); 
 int getMax(vector<int> * const  v); 

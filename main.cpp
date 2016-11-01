@@ -10,96 +10,79 @@ using namespace std;
 int main() {
 
 	//string imageName = "pa_90.fits"; 
-	vector<string> CHIPS; 
+	// vector<string> CHIPS =     {"S1","S2","S3","S4","S5","S6","S8","S9","S10","S11","S12","S13","S14",
+ //        						"S15","S16","S17","S18","S19","S20","S21","S22","S23","S24","S25","S26",
+ //        						"S27","S28","S29","S30","S31","N1","N2","N3","N4","N5","N6","N7","N8",
+ //        						"N9","N10","N11","N12","N13","N14","N15","N16","N17","N18","N19","N20",
+ //        						"N21","N22","N23","N24","N25","N26","N27","N28","N29","N31"}; 
 
-    CHIPS.push_back("S1");      CHIPS.push_back("S2");      CHIPS.push_back("S3");      CHIPS.push_back("S4");      CHIPS.push_back("S5");      CHIPS.push_back("S6");  
-    CHIPS.push_back("S8");      CHIPS.push_back("S9");      CHIPS.push_back("S10");     CHIPS.push_back("S11");     CHIPS.push_back("S12");     CHIPS.push_back("S13"); 
-    CHIPS.push_back("S14");     CHIPS.push_back("S15");     CHIPS.push_back("S16");     CHIPS.push_back("S17");     CHIPS.push_back("S18");     CHIPS.push_back("S19"); 
-    CHIPS.push_back("S20");     CHIPS.push_back("S21");     CHIPS.push_back("S22");     CHIPS.push_back("S23");     CHIPS.push_back("S24");     CHIPS.push_back("S25"); 
-    CHIPS.push_back("S26");     CHIPS.push_back("S27");     CHIPS.push_back("S28");     CHIPS.push_back("S29");     CHIPS.push_back("S30");     CHIPS.push_back("S31"); 
-    CHIPS.push_back("N1");      CHIPS.push_back("N2");      CHIPS.push_back("N3");      CHIPS.push_back("N4");      CHIPS.push_back("N5");      CHIPS.push_back("N6");      CHIPS.push_back("N7");      CHIPS.push_back("N8"); 
-    CHIPS.push_back("N9");      CHIPS.push_back("N10");     CHIPS.push_back("N11");     CHIPS.push_back("N12");     CHIPS.push_back("N13");     CHIPS.push_back("N14");     CHIPS.push_back("N15");     CHIPS.push_back("N16"); 
-    CHIPS.push_back("N17");     CHIPS.push_back("N18");     CHIPS.push_back("N19");     CHIPS.push_back("N20");     CHIPS.push_back("N21");     CHIPS.push_back("N22");     CHIPS.push_back("N23");     CHIPS.push_back("N24"); 
-    CHIPS.push_back("N25");     CHIPS.push_back("N26");     CHIPS.push_back("N27");     CHIPS.push_back("N28");     CHIPS.push_back("N29");     CHIPS.push_back("N31"); 
+	vector<string> CHIPS = {"S25"}; 
 
-	 
-	string dataDIR = "dataCatalog/"; 
-	string simuDIR = "simuCatalog/"; 
-if(0) {
-   	for(int i=0; i<CHIPS.size(); ++i) {
-   		string dataImageName = dataDIR + CHIPS[i] +  "_test_image.fits";
-   		if(!ifstream(dataImageName)) 
-			continue; 
-		
-		string dataCatalogName = dataDIR + CHIPS[i] + "_dataCatalog.txt"; 
-		
-		string dataCMD = "/usr/local/bin/sex -c data.sex " + dataImageName + " -CATALOG_NAME " + dataCatalogName; 
+    Conf conf("conf.txt"); 
+    conf.updateShiftCorrection(); 
 
-		int status = system(dataCMD.c_str()); 
+	/*****************   SEXATCTIR *****************/
+    if(conf.extractData) {
+	   	for(auto & chip: CHIPS) {
+	   		string dataImageName = conf.dataDIR + chip +  "_test_image.fits";
+	   		if(!ifstream(dataImageName)) continue; 
+			string dataCatalogName = conf.dataDIR + chip + "_dataCatalog.txt"; 
+			string dataCMD = "/usr/local/bin/sex -c data.sex " + dataImageName + " -CATALOG_NAME " + dataCatalogName; 
+			int status = system(dataCMD.c_str()); 
+		} 
+	}	
 
-	} 
-}
+	string fileNameTail = "_x_0.0_y_-1.0_z_0.0_phi_-216000_psi_0.0_theta_0.0_seeing_0.7.fits"; 
 
-
-string fileNameTail = "_x_0.0_y_-1.0_z_0.0_phi_-216000_psi_0.0_theta_0.0_seeing_0.7.fits"; 
-
-if(0) {
-	for(int i=0; i<CHIPS.size(); ++i) {
-
-		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  fileNameTail;
-		if(!ifstream(simuImageName)) 
-			continue; 
-		string simuCatalogName = simuDIR + CHIPS[i] + "_simuCatalog.txt"; 
-		
-		string simuCMD = "/usr/local/bin/sex -c sim.sex  " + simuImageName + " -CATALOG_NAME " + simuCatalogName; 
-		int status = system(simuCMD.c_str()); 
-	}
-}
-
-/*
-	for(int i=0; i<CHIPS.size(); ++i) {
-		cout << CHIPS[i] << endl; 
-		string dataCatalogName = dataDIR + CHIPS[i] + "_dataCatalog.txt"; 
-		string simuCatalogName = simuDIR + CHIPS[i] + "_simuCatalog.txt"; 
-		
-		if(!ifstream(dataCatalogName) or !ifstream(simuCatalogName)) 
-			continue; 
-		string dataImageName = dataDIR + CHIPS[i] +  "_test_image.fits";
-		string simuImageName = simuDIR + "Images_" + CHIPS[i] +  fileNameTail;
-
-		Image* dataImage = new Image(dataImageName); 
-		Image* simuImage = new Image(simuImageName); 
-
-		Star *dataStarList = new Star(CHIPS[i], dataCatalogName); 
-		Star *simuStarList = new Star(CHIPS[i], simuCatalogName); 
-		
-		dataStarList->updateEllipticity(dataImage); 
-		simuStarList->updateEllipticity(simuImage); 
-		dataStarList->matchObj(simuStarList); 
-		dataStarList->writeTxt(simuStarList, simuDIR + CHIPS[i] + "_output_test.txt");  // data on the left; simu on the right; 
-		delete dataImage, simuImage, dataStarList, simuStarList;  
+	if(conf.extractSimu) {
+		for(auto & chip: CHIPS) {
+			string simuImageName = conf.simuDIR + "Images_" + chip +  fileNameTail;
+			if(!ifstream(simuImageName)) continue; 
+			string simuCatalogName = conf.simuDIR + chip + "_simuCatalog.txt"; 
+			string simuCMD = "/usr/local/bin/sex -c sim.sex  " + simuImageName + " -CATALOG_NAME " + simuCatalogName; 
+			int status = system(simuCMD.c_str()); 
+		}
 	}
 
-*/
+	/*****************   Analyze Data *****************/
 
-	double x = 0.5; 
-	double y = -1.0; 
-	double z = 0.01; 
-	double phi = 108000; 
-	double psi = 0.0; 
-	double theta = -40.0; 
-	double seeing = 0.7; 
-	double rotation = 270.0; 
-	double magCorrection = 6.0; 
-	string chipID = "N10"; 
+	if(conf.analyze) {
+		for(auto & chip: CHIPS) {
+			cout << "Analyzing " << chip << "....." << endl; 
+			string dataCatalogName = conf.dataDIR + chip + "_dataCatalog.txt"; 
+			string simuCatalogName = conf.simuDIR + chip+ "_simuCatalog.txt"; 
+			
+			if(!ifstream(dataCatalogName) || !ifstream(simuCatalogName)) 
+				continue; 
+			string dataImageName = conf.dataDIR + chip +  "_test_image.fits";
+			string simuImageName = conf.simuDIR + "Images_" + chip +  fileNameTail;
 
-	Conf* conf = new Conf(chipID, x, y, z, phi, psi, theta, seeing, magCorrection, rotation); 
-	conf->updateShiftCorrection(); 
+			Image dataImage(dataImageName); 
+			Image simuImage(simuImageName); 
+
+			Star dataStarList(chip, dataCatalogName); 
+			Star simuStarList(chip, simuCatalogName); 
+
+			dataStarList.updateEllipticity(dataImage); 
+			simuStarList.updateEllipticity(simuImage); 
+			dataStarList.matchObj(simuStarList); 
+
+			dataStarList.writeTxt(simuStarList, conf.simuDIR + chip + "_output_test.txt");  // data on the left; simu on the right; 
+		}
+	}
+
+
+
 
 	catalogGenerator(conf); 
 
 
-	delete conf; 
+	// cout << "hello " << endl; 
+
+	// delete conf; 
+
+
+	
 
 }
 

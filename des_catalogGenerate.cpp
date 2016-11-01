@@ -15,20 +15,16 @@ using namespace std;
 #define COEF_ARCSEC_TO_RAD 4.8481e-6
 
 
-void catalogGenerator(Conf* conf) {
+void catalogGenerator(Conf& conf) {
 
    
-
-	
-
-
 	//map<string, vector<double> > correctMap = parseConfigFile("conf.txt"); 
 	string dataDIR = "dataCatalog/"; 
 
-	string dataImageName = dataDIR + conf->chipID +  "_test_image.fits";
-	string dataCatalogName = dataDIR + conf->chipID + "_dataCatalog.txt"; 
+	string dataImageName = dataDIR + conf.chipID +  "_test_image.fits";
+	string dataCatalogName = dataDIR + conf.chipID + "_dataCatalog.txt"; 
 
-	Star *dataStarList = new Star(conf->chipID, dataCatalogName); 
+	Star dataStarList(conf.chipID, dataCatalogName); 
 
 
 	map<string, double> headerMap = getHeader(dataImageName);  // include 'AZ', 'TELRA', 'TELDEC'
@@ -38,37 +34,36 @@ void catalogGenerator(Conf* conf) {
 	string suffix = to_string(int(1000000.0 + 9000000.0 * rand()/(RAND_MAX + 1.0))); 
 
 
-	writePhosimCommand(conf->chipID + "_phosimCommand_ID_" + suffix, conf) ; 
-	wrtiePhosimCatalog(conf->chipID + "_phosimCatalog_ID_" + suffix, dataStarList, headerMap, conf); 
-	writePhosimRun	  ("run_sample.txt", suffix, conf); 
+	writePhosimCommand(conf.phosimFileDIR + conf.chipID + "_com_" + suffix, conf) ; 
+	wrtiePhosimCatalog(conf.phosimFileDIR + conf.chipID + "_cat_" + suffix, dataStarList, headerMap, conf); 
+	writePhosimRun	  (conf.phosimFileDIR + "run_sample.txt", suffix, conf); 
 	//delete conf; 
 
 }
 
 
-void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
+void writePhosimRun(string runScriptName, string suffix,  Conf& conf) {
 
-	string DestinationDIR = "output_fits"; 
+	string DestinationDIR = conf.phosimFileDIR + "output_fits"; 
 
 	ofstream file; 
 	file.open(runScriptName);
-	string chipID = conf->chipID; 
+	string chipID = conf.chipID; 
 	
 	
-	string workDirectory = chipID + "_work_ID_" + suffix ; 
-    string outputDirectory = chipID + "_output_ID_" + suffix ; 
+	string workDirectory = chipID + "_work_" + suffix ; 
+    string outputDirectory = chipID + "_output_" + suffix ; 
 
 
 	string outputName = DestinationDIR + "/"+ "Images_" + chipID 
-                 + "_x_" + to_string(conf->x)
-                 + "_y_" + to_string(conf->y)
-                 + "_z_" + to_string(conf->z)
-                 + "_phi_" + to_string(conf->phi)
-                 + "_psi_" + to_string(conf->psi)
-                 + "_theta_" + to_string(conf->theta)
-                 + "_seeing_" + to_string(conf->seeing) 
+                 + "_x_" + to_string(conf.x)
+                 + "_y_" + to_string(conf.y)
+                 + "_z_" + to_string(conf.z)
+                 + "_phi_" + to_string(conf.phi)
+                 + "_psi_" + to_string(conf.psi)
+                 + "_theta_" + to_string(conf.theta)
+                 + "_seeing_" + to_string(conf.seeing) 
                  + ".fits" ; 
-
 
 
     // write the run script; 
@@ -77,8 +72,8 @@ void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
     		<< "PHOSIM_PATH=/Users/cheng109/toberemoved/phosim/phosim_core/ \n"
     		<< "mkdir $pwd/"+ workDirectory +" $pwd/" + outputDirectory + "\n"  // create 'work' and 'output' directories; 
     		<< "cd $PHOSIM_PATH \n"
-    		<< "./phosim $pwd/" + chipID +"_phosimCatalog_ID_" + suffix 
-    			+ " -c $pwd/" + chipID +"_phosimCommand_ID_" + suffix
+    		<< "./phosim $pwd/" + chipID +"_cat_" + suffix 
+    			+ " -c $pwd/" + chipID +"_com_" + suffix
     			+ " -e 0 -w $pwd/"+ workDirectory + " -o $pwd/" + outputDirectory
                 + " -i deCam" 
                 + " -s " +chipID 
@@ -86,8 +81,8 @@ void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
             << "cp $pwd/" + outputDirectory+ "/*"+chipID +"*.fits " + "$pwd/" + outputName + "\n" 
             << "rm -rf $pwd/" +  workDirectory   				 + "\n" 
             << "rm -rf $pwd/" +  outputDirectory 				 + "\n" 
-			<< "rm -rf $pwd/" +  chipID + "_phosimCatalog_ID_"  + suffix + "\n" 
-            << "rm -rf $pwd/" +  chipID + "_phosimCommand_ID_"  + suffix + "\n" ; 
+			<< "rm -rf $pwd/" +  chipID + "_cat_"  + suffix + "\n" 
+            << "rm -rf $pwd/" +  chipID + "_com_"  + suffix + "\n" ; 
     file.close(); 
     string chmodCMD = "chmod +x " + runScriptName;  
     system(chmodCMD.c_str()); 
@@ -95,17 +90,17 @@ void writePhosimRun(string runScriptName, string suffix,  Conf* conf) {
 }
 
 
-void wrtiePhosimCatalog(string phosimCatalogName, Star* dataStarList, map<string, double> &headerMap,  Conf* conf) {
+void wrtiePhosimCatalog(string phosimCatalogName, Star& dataStarList, map<string, double> &headerMap,  Conf& conf) {
 	ofstream file; 
 	file.open(phosimCatalogName); 
 	double factor = cos(headerMap["TELDEC"]*M_PI /180.0); 
 
-	file    << "Unrefracted_RA_deg "   + to_string(headerMap["TELRA"] + conf->dRA*factor) + "\n"
-            << "Unrefracted_Dec_deg "  + to_string(headerMap["TELDEC"]+ conf->dDEC) 		+ "\n"
+	file    << "Unrefracted_RA_deg "   + to_string(headerMap["TELRA"] + conf.dRA*factor) + "\n"
+            << "Unrefracted_Dec_deg "  + to_string(headerMap["TELDEC"]+ conf.dDEC) 		+ "\n"
             << "Unrefracted_Azimuth "  + to_string(headerMap["AZ"])            					+ "\n"
             << "Unrefracted_Altitude " + to_string(90.0-headerMap["ZD"])						+ "\n"
-            << "Opsim_rotskypos "      + to_string(conf->rotation) 								+ "\n"
-            << "Opsim_rawseeing "	   + to_string(conf->seeing)   								+ "\n"
+            << "Opsim_rotskypos "      + to_string(conf.rotation) 								+ "\n"
+            << "Opsim_rawseeing "	   + to_string(conf.seeing)   								+ "\n"
             << "SIM_VISTIME " 		   + to_string(headerMap["EXPTIME"]) 						+ "\n"
             << "Opsim_rottelpos 0 \n" 
 			<<"Opsim_moondec -90 \n" 
@@ -125,37 +120,33 @@ void wrtiePhosimCatalog(string phosimCatalogName, Star* dataStarList, map<string
 			<<"SIM_NSNAP 1 \n" ; 
 
 
-	double magCorrection = 4.0 ; 
-	for (int i=0; i<dataStarList->numObj; ++i) {
+	//double magCorrection = 4.0 ; 
+	for (int i=0; i<dataStarList.numObj; ++i) {
 
 		file 	<< "object " 
-				<< to_string(dataStarList->ID[i]) + " " 
-				<< to_string(dataStarList->xworld[i]) + " " 
-				<< to_string(dataStarList->yworld[i]) + " " 
-				<< to_string(dataStarList->mag[i] + magCorrection ) + " "
-				<< (dataStarList->sed[i]) + " " 
-				<< to_string(dataStarList->z[i]) + " " 
-				<< to_string(dataStarList->gamma1[i]) + " "
-            	<< to_string(dataStarList->gamma2[i]) + " "
-            	<< to_string(dataStarList->mu[i]) + " "
-            	<< to_string(dataStarList->delta_ra[i]) + " "
-            	<< to_string(dataStarList->delta_dec[i]) + " "
-            	<< (dataStarList->type_str[i]) + " "; 
+				<< to_string(dataStarList.ID[i]) + " " 
+				<< to_string(dataStarList.xworld[i]) + " " 
+				<< to_string(dataStarList.yworld[i]) + " " 
+				<< to_string(dataStarList.mag[i] + conf.magCorrection ) + " "
+				<< (dataStarList.sed[i]) + " " 
+				<< to_string(dataStarList.z[i]) + " " 
+				<< to_string(dataStarList.gamma1[i]) + " "
+            	<< to_string(dataStarList.gamma2[i]) + " "
+            	<< to_string(dataStarList.mu[i]) + " "
+            	<< to_string(dataStarList.delta_ra[i]) + " "
+            	<< to_string(dataStarList.delta_dec[i]) + " "
+            	<< (dataStarList.type_str[i]) + " "; 
 
-        if( dataStarList->type[i]==STAR) 
+        if( dataStarList.type[i]==STAR) 
         	file << "none none\n"; 
         else 
-        	file << to_string(dataStarList->gauss_sigma[i]) + " none none\n"; 
+        	file << to_string(dataStarList.gauss_sigma[i]) + " none none\n"; 
 	}
-
-
 	file.close(); 
-
-
 }
 
 
-void writePhosimCommand(string phosimCommandName, Conf* conf) {
+void writePhosimCommand(string phosimCommandName, Conf& conf) {
 	ofstream file; 
 	file.open(phosimCommandName) ; 
 	file    << "zenith_v 1000.0\n"
@@ -166,12 +157,12 @@ void writePhosimCommand(string phosimCommandName, Conf* conf) {
                //#+ "throughputfile 1\n"
             << "domeseeing 0.0\n"
             << "lascatprob 0.0\n"
-            << "body 0 0 " + to_string(conf->phi   * COEF_ARCSEC_TO_RAD) + "\n"
-            << "body 0 1 " + to_string(conf->psi   * COEF_ARCSEC_TO_RAD) + "\n"
-            << "body 0 2 " + to_string(conf->theta * COEF_ARCSEC_TO_RAD) + "\n"
-            << "body 0 3 " + to_string(conf->x) + "\n"
-            << "body 0 4 " + to_string(conf->y) + "\n"
-            << "body 0 5 " + to_string(conf->z) + "\n"; 
+            << "body 0 0 " + to_string(conf.phi   * COEF_ARCSEC_TO_RAD) + "\n"
+            << "body 0 1 " + to_string(conf.psi   * COEF_ARCSEC_TO_RAD) + "\n"
+            << "body 0 2 " + to_string(conf.theta * COEF_ARCSEC_TO_RAD) + "\n"
+            << "body 0 3 " + to_string(conf.x) + "\n"
+            << "body 0 4 " + to_string(conf.y) + "\n"
+            << "body 0 5 " + to_string(conf.z) + "\n"; 
     file.close() ; 
 
 }
@@ -214,39 +205,3 @@ map<string, double> getHeader(string imageName) {
 	return header; 
 
 }
-
-
-map<string, vector<double> > parseConfigFile(string configFileName) {
-
-	//configFileName = "conf.txt"; 
-	ifstream configFile(configFileName.c_str());
-	string line;
-	map<string, vector<double> > confMap; 
-	while (getline(configFile, line)) {
-		//cout << line.size() << endl; 
-		if(line.size() > 0 and line.at(0)!='#') {
-			vector<string> items = splitString(line);
-			if (items.size() ==4) {
-
-				vector<double> shift(2); 
-				shift[0] = stod(items[2]); 
-				shift[1] = stod(items[3]); 
-				confMap[items[0]] = shift; 
-			}
-		}
-	}
-	configFile.close() ; 
-	return confMap; 
-}
-
-
-Conf::Conf(string chipID, double x, double y, double z, double phi, double psi, double theta, double seeing, double magCorrection,  double rotation): 
-            chipID(chipID), x(x), y(y), z(z), phi(phi), psi(psi), theta(theta), seeing(seeing), magCorrection(magCorrection), rotation(rotation) {
-
-        coarseCorrectMap = parseConfigFile("conf.txt"); 
-        dDEC_coarse = coarseCorrectMap[chipID][0]; 
-        dRA_coarse  = coarseCorrectMap[chipID][1]; 
-        dROT_coarse = rotation ; // coarseCorrectMap[chipID][2];
-        //vector<double> shiftCorrect =  shiftCorrection(conf); 
-    } 
-

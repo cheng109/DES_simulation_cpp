@@ -61,9 +61,9 @@ public:
 	Star() ; 
 	Star(string chipID, string sexFileName) ; 
 	void printStarListInfo(int n); 
-	void matchObj(Star* starList); 
-	void updateEllipticity(Image* image) ; 
-	void writeTxt(Star* starList, string outFileName); 
+	void matchObj(Star& starList); 
+	void updateEllipticity(Image& image) ; 
+	void writeTxt(Star& starList, string outFileName); 
 }; 
 
 
