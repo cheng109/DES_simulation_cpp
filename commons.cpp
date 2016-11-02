@@ -260,56 +260,55 @@ Conf::Conf (string configFileName){
         //cout << line.size() << endl; 
         if(line.size() > 0 and line.at(0)!='#') {
             vector<string> items = splitString(line);
-            if (items.size() ==4) {
-
-                vector<double> shift(2); 
-                shift[0] = stod(items[2]); 
-                shift[1] = stod(items[3]); 
-                coarseCorrectMap[items[0]] = shift; 
-            }
+            if (items.size() ==4) 
+                coarseCorrectMap[items[0]] = {stod(items[2]), stod(items[3])}; 
             if(items.size() ==2)  
                 tempMp[items[0]] = items[1]; 
         }
     }
-
     //   Assign all the other configuration parameters; 
-    dataDIR = tempMp["dataDIR"] ; 
-    simuDIR= tempMp["simuDIR"] ; 
-    extractData = stoi(tempMp["extractData"]); 
-    extractSimu = stoi(tempMp["extractSimu"]); 
-    analyze     = stoi(tempMp["analyze"]) ; 
+    originDataDIR   = tempMp["originDataDIR"    ]; 
+    dataDIR         = tempMp["dataDIR"          ]; 
+    simuDIR         = tempMp["simuDIR"          ]; 
+    chipID          = tempMp["chipID"           ]; 
+    phosimFileDIR   = tempMp["phosimFileDIR"    ]; 
 
-    chipID = tempMp["chipID"] ; 
-    x = stod(tempMp["x"]); 
-    y = stod(tempMp["y"]); 
-    z = stod(tempMp["z"]); 
-    phi = stod(tempMp["phi"]); 
-    psi = stod(tempMp["psi"]) ; 
-    theta = stod(tempMp["theta"]); 
-    seeing = stod(tempMp["seeing"]); 
-    magCorrection = stod(tempMp["magCorrection"]); 
-    rotation = stod(tempMp["rotation"]);   
-    phosimFileDIR = tempMp["phosimFileDIR"]; 
+    extractData     = stoi(tempMp["extractData" ]); 
+    extractSimu     = stoi(tempMp["extractSimu" ]); 
+    analyze         = stoi(tempMp["analyze"     ]); 
+    phosimScript    = stoi(tempMp["phosimScript"]); 
+    runPhosim       = stoi(tempMp["runPhosim"   ]); 
+    
+    x               = stod(tempMp["x"            ]); 
+    y               = stod(tempMp["y"            ]); 
+    z               = stod(tempMp["z"            ]); 
+    phi             = stod(tempMp["phi"          ]); 
+    psi             = stod(tempMp["psi"          ]); 
+    theta           = stod(tempMp["theta"        ]); 
+    seeing          = stod(tempMp["seeing"       ]); 
+    magCorrection   = stod(tempMp["magCorrection"]); 
+    rotation        = stod(tempMp["rotation"     ]);   
+    tolerance       = stod(tempMp["tolerance"    ]);
 
+
+    //   update single chipID shift correction; 
+    dDEC_coarse = coarseCorrectMap[chipID].first;
+    dRA_coarse  = coarseCorrectMap[chipID].second; 
+    dROT_coarse = rotation; 
+ 
     configFile.close() ;      
     } 
 
 
-
-
-
-
-
-
-
 void Conf::updateShiftCorrection() {
 
-    vector<double> ret; 
     double TOL = 1.0e-3; 
 
+    /********  correction due to 'x & y' **********/
     double dDEC1 = -72.933*x - 0.3333 ; 
     double dRA1  = 240.47*y ; 
 
+    /********  correction due to 'phi & theta' **********/
     double dDEC2 = 0; 
     double dRA2  = 0;
     double dRotation = 0; 
@@ -342,14 +341,21 @@ void Conf::updateShiftCorrection() {
         exit(1); 
     } 
 
+    /************** for single chip **************/ 
+    double singleDEC = 0.3;       // dx ; 
+    double singleRA  = 14.5;    // dy ; 
+    double singleROT = -0.21; 
+
     dDEC_shift = dDEC1 + dDEC2; 
     dRA_shift  = dRA1 + dRA2; 
     dROT_shift = dRotation; 
 
-    dRA  = (dRA_shift  + dRA_coarse)*0.27/3600; 
-    dDEC = (dDEC_shift + dDEC_coarse)*0.27/3600; 
-    dROT = dROT_shift + dROT_coarse; 
 
+
+    dRA  = (dRA_shift  + dRA_coarse  + singleRA )*0.27/3600; 
+    dDEC = (dDEC_shift + dDEC_coarse + singleDEC)*0.27/3600; 
+    dROT = dROT_shift  + dROT_coarse + singleROT; 
+    cout << dROT << endl; 
 }
 
 #endif 

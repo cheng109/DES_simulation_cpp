@@ -5,6 +5,7 @@
 #include "Star.h"
 #include "commons.h"
 #include <cmath>
+#include <climits>
 using namespace std; 
 
 
@@ -72,39 +73,51 @@ Star::Star(string chipID, string sexFileName):chipID(chipID) {
 void Star::matchObj(Star& starList) {
 	// update 'matchIndex' for both starList; 
 	// match all objects;
-	double tol = 15 ; // unit: pixel 
+	double tol = 5 ; // unit: pixel 
+
+	
 	for(int i=0; i<numObj; ++i) {
+		double minDR2 = INT_MAX; 
+		int minIDX = -1; 
 		for (int j=0; j<starList.numObj ; ++j) {
-			if( starList.matchIndex[j] == -1 and starList.type[i] == this->type[i]) {
+
+			if( starList.matchIndex[j] == -1 && starList.type[i] == type[i]) {
 
 				double dx = starList.xcenter[j] - xcenter[i]; 
 				double dy = starList.ycenter[j] - ycenter[i]; 
 				double dr2 = dx*dx + dy*dy; 
-				//cout << "dr2: " << dr2 << endl; 
-				if (dr2 < tol*tol) {
-
-					this->matchIndex[i] = j ;
-					starList.matchIndex[j] = i; 
-					if (starList.type[i]== STAR) {
-
-						this->good[i] 	  = 1; 
-						starList.good[i] = 1; 
-					}
+				
+				if(dr2<minDR2) {
+					minDR2 = dr2; 
+					minIDX = j; 
 				}
-
+				minDR2 = min(minDR2, dr2); 
 			}
 		}
-		numGood += this->good[i] ; 
+		if (minDR2 < tol*tol) {
+			matchIndex[i] = minIDX ;
+			starList.matchIndex[minIDX] = i; 
+			if (starList.type[i]== STAR) {
+				good[i] 	  = 1; 
+				starList.good[minIDX] = 1; 
+			}
+		}
+
+
+		numGood += good[i] ; 
 
 	}
-	starList.numGood = this->numGood; 
+	//cout <<"MinDR2: " << minDR2 << endl; 
+
+	starList.numGood = numGood; 
 
 	for(int i=0; i<numObj; ++i) {
-		if(this->matchIndex[i]!=-1) 
-			this->numMatch ++ ; 	
+		if(matchIndex[i]!=-1) 
+			numMatch ++ ; 	
 	
 	}
-	starList.numMatch = this->numMatch; 
+	cout << "good: " << numGood << endl; 
+	starList.numMatch = numMatch; 
 }
 
 void Star::updateEllipticity(Image& image) {
@@ -151,29 +164,27 @@ void Star::writeTxt(Star& starList, string outFileName) {
 	outFile.open(outFileName); 
 	for(int i=0; i<numObj; ++i) {
 		if(good[i] == 1) {
-			outFile << to_string(this->e[i]) + "\t"      // C0
-					<< to_string(this->PA[i]) + "\t" 	 
-					<< to_string(this->e1[i]) + "\t" 
-					<< to_string(this->e2[i]) + "\t" 
-					<< to_string(this->xcenter[i]) + "\t" 
-					<< to_string(this->ycenter[i]) + "\t" 
-					<< to_string(this->xworld[i]) + "\t" 
-					<< to_string(this->yworld[i]) + "\t" ; 
+			outFile << to_string(e[i]) + "\t"      // C0
+					<< to_string(PA[i]) + "\t" 	 
+					<< to_string(e1[i]) + "\t" 
+					<< to_string(e2[i]) + "\t" 
+					<< to_string(xcenter[i]) + "\t" 
+					<< to_string(ycenter[i]) + "\t" 
+					<< to_string(xworld[i])  + "\t" 
+					<< to_string(yworld[i])  + "\t"  
+					<< to_string(mag[i]) 	 + "\t" ; 
 
-
-			outFile << to_string(starList.e[matchIndex[i]]) + "\t"  // C8
+			outFile << to_string(starList.e [matchIndex[i]]) + "\t"  // C8
 					<< to_string(starList.PA[matchIndex[i]]) + "\t" 
 					<< to_string(starList.e1[matchIndex[i]]) + "\t" 
 					<< to_string(starList.e2[matchIndex[i]]) + "\t" 
 					<< to_string(starList.xcenter[matchIndex[i]]) + "\t" 
 					<< to_string(starList.ycenter[matchIndex[i]]) + "\t" 
-					<< to_string(starList.xworld[matchIndex[i]]) + "\t" 
-					<< to_string(starList.yworld[matchIndex[i]]) + "\t" ; 
+					<< to_string(starList.xworld [matchIndex[i]]) + "\t" 
+					<< to_string(starList.yworld [matchIndex[i]]) + "\t" 
+					<< to_string(starList.mag[i]) 	 			  + "\t" ; 
 			outFile << endl; 
 		}
-
-
-
 	}
 	outFile.close(); 
 

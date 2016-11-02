@@ -1,3 +1,34 @@
+
+##########  Directory setting ########## 
+dataDIR	dataCatalog/
+simuDIR simuCatalog/
+phosimFileDIR	phosimFiles/
+########################################
+
+
+
+
+##########  Procedure Control ########## 
+extractData 1
+extractSimu 1
+analyze		1
+######################################## 
+
+#################  
+chipID   N10
+x 	0.5	
+y   -0.1
+z   0.01
+phi  108000
+psi  0.0
+theta -40.0
+seeing 0.7
+magCorrection 6.0
+rotation 270.0
+
+
+
+
 ## Coarse Correction
 ##  (1) CHIP
 ##	(2)	SHIFT_X

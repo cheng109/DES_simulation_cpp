@@ -30,7 +30,7 @@ import random
 
 CLASSIFICATION_THRESHOLD = 0.95
 PIXEL_SCALE = 0.27
-MAGNITUDE_THRESHOLD = 22.5
+MAGNITUDE_THRESHOLD = 21.0
 
 class SexSource():
     def __init__(self, chipID,  objDict):
@@ -296,41 +296,43 @@ def main():
             'N21', 'N22', 'N23', 'N24','N25', 'N26','N27', 'N28', 'N29', 'N31'
             ]
 
-    CHIPS = [
-            'S1', 'S2','S3',
-            'S5', 'S6', 'S8',
-            'S9', 'S10','S11',
-            'S12','S13', 'S14',
-            'S15','S16', 'S17',
-            'S18', 'S19', 'S20',
-             'S21', 'S23', 'S24',
-            'S25', 'S26','S27',
-            'S28', 'S29', 'S31',
-             'N8','N9', 'N10',
-            'N11', 'N12','N13',
-            'N14','N15','N16',
-            'N17', 'N18', 'N19',
-            'N20','N21', 'N23',
-            'N24','N25', 'N26',
-            'N27', 'N28', 'N29',
-            'N31'
-            ]
+    # CHIPS = [
+    #         'S1', 'S2','S3',
+    #         'S5', 'S6', 'S8',
+    #         'S9', 'S10','S11',
+    #         'S12','S13', 'S14',
+    #         'S15','S16', 'S17',
+    #         'S18', 'S19', 'S20',
+    #          'S21', 'S23', 'S24',
+    #         'S25', 'S26','S27',
+    #         'S28', 'S29', 'S31',
+    #          'N8','N9', 'N10',
+    #         'N11', 'N12','N13',
+    #         'N14','N15','N16',
+    #         'N17', 'N18', 'N19',
+    #         'N20','N21', 'N23',
+    #         'N24','N25', 'N26',
+    #         'N27', 'N28', 'N29',
+    #         'N31'
+    #         ]
 
-
-    shift = {"x": 0.0, "y": 0.0, "z": 0.0}
-    tilt = {"phi":  0.0, "psi": 0.0, "theta": 0.0}    # arcsec
+    CHIPS = ["N1", "N2", "N3","N4", "N5", "N6", "N7", "N22", "S22", "S30", "S4"]
+    #CHIPS = ['N7']
+    shift = {"x": 0.5, "y": -1.0, "z": 0.01}
+    tilt = {"phi":  108000, "psi": 0.0, "theta": -40.0}    # arcsec
     #tilt = {"phi": 324000.0, "psi": 0.0, "theta": 0.0}
     fineCorrect={}
-    rawSeeing = 0.5
+    rawSeeing = 0.7
+    #
+    # shift["x"] = float(sys.argv[2])
+    # shift["y"] = float(sys.argv[3])
+    # shift["z"] = float(sys.argv[4])
+    # tilt["phi"] = float(sys.argv[5])
+    # tilt["psi"] = float(sys.argv[6])
+    # tilt["theta"] = float(sys.argv[7])
 
-    shift["x"] = float(sys.argv[2])
-    shift["y"] = float(sys.argv[3])
-    shift["z"] = float(sys.argv[4])
-    tilt["phi"] = float(sys.argv[5])
-    tilt["psi"] = float(sys.argv[6])
-    tilt["theta"] = float(sys.argv[7])
+    #CHIPS = [str(sys.argv[1])]
 
-    CHIPS = [str(sys.argv[1])]
     DestinationDir = "test_correction"
     
 
@@ -355,13 +357,13 @@ def main():
             createRun(scriptName, chip, shift,tilt, rawSeeing,   DestinationDir, suffix=suffix)
 
             counter += 1
-            #if counter%12==0:
-            combRUN = combRUN + "./" + scriptName  + " \n"
-            #else:
-            #    combRUN = combRUN + "./" + scriptName  + " & \n"
+            if counter%12==0:
+                combRUN = combRUN + "./" + scriptName  + " \n"
+            else:
+                combRUN = combRUN + "./" + scriptName  + " & \n"
 
 
-    print dRA, dDEC
+    #print dRA, dDEC
     combRunName = "combRUN_new"
     f = open(combRunName, 'w')
     f.write(combRUN)

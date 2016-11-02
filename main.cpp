@@ -16,27 +16,38 @@ int main() {
  //        						"N9","N10","N11","N12","N13","N14","N15","N16","N17","N18","N19","N20",
  //        						"N21","N22","N23","N24","N25","N26","N27","N28","N29","N31"}; 
 
-	vector<string> CHIPS = {"S25"}; 
+	vector<string> CHIPS = {"N4"}; 
 
-    Conf conf("conf.txt"); 
+    Conf conf("conf.sh"); 
     conf.updateShiftCorrection(); 
 
-	/*****************   SEXATCTIR *****************/
+	/*****************   SEXATCTIR  orginal data *****************/
     if(conf.extractData) {
 	   	for(auto & chip: CHIPS) {
-	   		string dataImageName = conf.dataDIR + chip +  "_test_image.fits";
+	   		string dataImageName = conf.originDataDIR + chip +  "_test_image.fits";
 	   		if(!ifstream(dataImageName)) continue; 
 			string dataCatalogName = conf.dataDIR + chip + "_dataCatalog.txt"; 
 			string dataCMD = "/usr/local/bin/sex -c data.sex " + dataImageName + " -CATALOG_NAME " + dataCatalogName; 
 			int status = system(dataCMD.c_str()); 
 		} 
 	}	
+	
 
-	string fileNameTail = "_x_0.0_y_-1.0_z_0.0_phi_-216000_psi_0.0_theta_0.0_seeing_0.7.fits"; 
+	/*****************  	Running Phosim Script   *****************/	
+	if(conf.phosimScript)  
+		catalogGenerator(conf); 
+	if(conf.runPhosim) {
+		string runPhosim("sh run_phosim.txt");
+		int status = system(runPhosim.c_str()); 
+	}
 
+	/*****************   SEXATCTIR  simulation data *****************/
+	string fileNameTail = ""; 
 	if(conf.extractSimu) {
 		for(auto & chip: CHIPS) {
-			string simuImageName = conf.simuDIR + "Images_" + chip +  fileNameTail;
+			//string simuImageName = conf.simuDIR + "Images_" + chip +  fileNameTail;
+			string simuImageName = "N4_output_/deCam_e_99999999_f1_N4_E000.fits"; 
+
 			if(!ifstream(simuImageName)) continue; 
 			string simuCatalogName = conf.simuDIR + chip + "_simuCatalog.txt"; 
 			string simuCMD = "/usr/local/bin/sex -c sim.sex  " + simuImageName + " -CATALOG_NAME " + simuCatalogName; 
@@ -45,36 +56,38 @@ int main() {
 	}
 
 	/*****************   Analyze Data *****************/
-
 	if(conf.analyze) {
 		for(auto & chip: CHIPS) {
 			cout << "Analyzing " << chip << "....." << endl; 
 			string dataCatalogName = conf.dataDIR + chip + "_dataCatalog.txt"; 
-			string simuCatalogName = conf.simuDIR + chip+ "_simuCatalog.txt"; 
+			string simuCatalogName = conf.simuDIR 		+ chip+ "_simuCatalog.txt"; 
 			
-			if(!ifstream(dataCatalogName) || !ifstream(simuCatalogName)) 
-				continue; 
-			string dataImageName = conf.dataDIR + chip +  "_test_image.fits";
-			string simuImageName = conf.simuDIR + "Images_" + chip +  fileNameTail;
-
+			// if(!ifstream(dataCatalogName) || !ifstream(simuCatalogName)) 
+			// 	continue; 
+			string dataImageName = conf.originDataDIR 	+ chip +  "_test_image.fits";
+			string simuImageName = "N4_output_/deCam_e_99999999_f1_N4_E000.fits"; 
 			Image dataImage(dataImageName); 
 			Image simuImage(simuImageName); 
-
 			Star dataStarList(chip, dataCatalogName); 
 			Star simuStarList(chip, simuCatalogName); 
+
+			cout << "number of data: " << dataStarList.numObj << endl; 
+			cout << "number of simu: " << simuStarList.numObj << endl; 
+			cout << "number of Good: " << dataStarList.numGood << endl; 		
+			cout << "number of Good: " << simuStarList.numGood << endl; 
 
 			dataStarList.updateEllipticity(dataImage); 
 			simuStarList.updateEllipticity(simuImage); 
 			dataStarList.matchObj(simuStarList); 
-
-			dataStarList.writeTxt(simuStarList, conf.simuDIR + chip + "_output_test.txt");  // data on the left; simu on the right; 
+		
+			dataStarList.writeTxt(simuStarList, chip + "_output_test.txt" );  // data on the left; simu on the right; 
 		}
 	}
 
 
 
 
-	catalogGenerator(conf); 
+
 
 
 	// cout << "hello " << endl; 

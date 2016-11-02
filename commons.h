@@ -1,11 +1,11 @@
 #ifndef COMMONS_H_
 #define COMMONS_H_
 #include <map> 
+#include <utility> 
 #include <unordered_map> 
 #include <string> 
 #include <vector> 
 #include "Image.h"
-
 
 
 class Conf{
@@ -21,30 +21,35 @@ public:
 	double seeing; 
 	double rotation; 
 
-	double dDEC_shift; 
+	/******** coarse **********/ 
 	double dDEC_coarse;
-
-	double dRA_shift;
 	double dRA_coarse; 
-
-	double dROT_shift; 
 	double dROT_coarse; 
 
+	/******** 		 **********/ 
+	double dDEC_shift; 
+	double dRA_shift;
+	double dROT_shift; 
 
+	/******** overall **********/ 
 	double dDEC; 
 	double dRA; 
 	double dROT; 
 
-
+	double tolerance; 
 	double magCorrection; 
 
-
 	/**************common configurations **************/; 
-	string dataDIR, simuDIR; 
-	unordered_map<string, vector<double>> coarseCorrectMap; 
+	string originDataDIR; 
+	string dataDIR; 
+	string simuDIR; 
+	unordered_map<string, pair<double, double>> coarseCorrectMap; 
 	bool extractData; 
 	bool extractSimu; 
+	bool phosimScript; 
+	bool runPhosim; 
 	bool analyze; 
+
 
 	string phosimFileDIR ; 
 	

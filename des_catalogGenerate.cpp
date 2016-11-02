@@ -15,14 +15,29 @@ using namespace std;
 #define COEF_ARCSEC_TO_RAD 4.8481e-6
 
 
+
+
+/***************************
+Function:   	catalogGenerator
+Description:    create files for PhoSim;  
+Arguments:		(1): Conf& conf; 
+Returns:
+Notes: 			write out 3 files:  
+				(1) phosim_catalog;
+				(2) phosim_command; 
+				(3) script to running phosim;   	
+****************************/
+
+
+
 void catalogGenerator(Conf& conf) {
 
    
 	//map<string, vector<double> > correctMap = parseConfigFile("conf.txt"); 
-	string dataDIR = "dataCatalog/"; 
+	
 
-	string dataImageName = dataDIR + conf.chipID +  "_test_image.fits";
-	string dataCatalogName = dataDIR + conf.chipID + "_dataCatalog.txt"; 
+	string dataImageName = conf.originDataDIR + conf.chipID +  "_test_image.fits";
+	string dataCatalogName = conf.dataDIR + conf.chipID + "_dataCatalog.txt"; 
 
 	Star dataStarList(conf.chipID, dataCatalogName); 
 
@@ -31,38 +46,44 @@ void catalogGenerator(Conf& conf) {
 
 
 	srand (time(NULL));
-	string suffix = to_string(int(1000000.0 + 9000000.0 * rand()/(RAND_MAX + 1.0))); 
+	string suffix = "" ; //to_string(int(1000000.0 + 9000000.0 * rand()/(RAND_MAX + 1.0))); 
 
 
 	writePhosimCommand(conf.phosimFileDIR + conf.chipID + "_com_" + suffix, conf) ; 
 	wrtiePhosimCatalog(conf.phosimFileDIR + conf.chipID + "_cat_" + suffix, dataStarList, headerMap, conf); 
-	writePhosimRun	  (conf.phosimFileDIR + "run_sample.txt", suffix, conf); 
+	writePhosimRun	  ("run_phosim.txt", suffix, conf); 
 	//delete conf; 
 
 }
 
 
+
+
+/***************************
+Function:   	catalogGenerator
+Description:    create files for PhoSim;  
+Arguments:		(1): Conf& conf; 
+Returns:
+Notes: 			write out 3 files:  
+				(1) phosim_catalog;
+				(2) phosim_command; 
+				(3) script to running phosim;   	
+****************************/
 void writePhosimRun(string runScriptName, string suffix,  Conf& conf) {
-
 	string DestinationDIR = conf.phosimFileDIR + "output_fits"; 
-
 	ofstream file; 
 	file.open(runScriptName);
 	string chipID = conf.chipID; 
-	
-	
 	string workDirectory = chipID + "_work_" + suffix ; 
     string outputDirectory = chipID + "_output_" + suffix ; 
-
-
 	string outputName = DestinationDIR + "/"+ "Images_" + chipID 
-                 + "_x_" + to_string(conf.x)
-                 + "_y_" + to_string(conf.y)
-                 + "_z_" + to_string(conf.z)
-                 + "_phi_" + to_string(conf.phi)
-                 + "_psi_" + to_string(conf.psi)
-                 + "_theta_" + to_string(conf.theta)
-                 + "_seeing_" + to_string(conf.seeing) 
+                 + "_x_" 		+ to_string(conf.x)
+                 + "_y_" 		+ to_string(conf.y)
+                 + "_z_" 		+ to_string(conf.z)
+                 + "_phi_" 		+ to_string(conf.phi)
+                 + "_psi_" 		+ to_string(conf.psi)
+                 + "_theta_" 	+ to_string(conf.theta)
+                 + "_seeing_" 	+ to_string(conf.seeing) 
                  + ".fits" ; 
 
 
@@ -72,15 +93,15 @@ void writePhosimRun(string runScriptName, string suffix,  Conf& conf) {
     		<< "PHOSIM_PATH=/Users/cheng109/toberemoved/phosim/phosim_core/ \n"
     		<< "mkdir $pwd/"+ workDirectory +" $pwd/" + outputDirectory + "\n"  // create 'work' and 'output' directories; 
     		<< "cd $PHOSIM_PATH \n"
-    		<< "./phosim $pwd/" + chipID +"_cat_" + suffix 
-    			+ " -c $pwd/" + chipID +"_com_" + suffix
+    		<< "./phosim $pwd/" +conf.phosimFileDIR + chipID +"_cat_" + suffix 
+    			+ " -c $pwd/" +conf.phosimFileDIR + chipID +"_com_" + suffix
     			+ " -e 0 -w $pwd/"+ workDirectory + " -o $pwd/" + outputDirectory
                 + " -i deCam" 
                 + " -s " +chipID 
                 + " && gunzip -f $pwd/" + outputDirectory + "/*"+chipID +"*.gz \n"
             << "cp $pwd/" + outputDirectory+ "/*"+chipID +"*.fits " + "$pwd/" + outputName + "\n" 
             << "rm -rf $pwd/" +  workDirectory   				 + "\n" 
-            << "rm -rf $pwd/" +  outputDirectory 				 + "\n" 
+            //<< "rm -rf $pwd/" +  outputDirectory 				 + "\n" 
 			<< "rm -rf $pwd/" +  chipID + "_cat_"  + suffix + "\n" 
             << "rm -rf $pwd/" +  chipID + "_com_"  + suffix + "\n" ; 
     file.close(); 
@@ -94,14 +115,16 @@ void wrtiePhosimCatalog(string phosimCatalogName, Star& dataStarList, map<string
 	ofstream file; 
 	file.open(phosimCatalogName); 
 	double factor = cos(headerMap["TELDEC"]*M_PI /180.0); 
+	double dRA = conf.dRA * factor; 
+	double dDEC = conf.dDEC; 
 
-	file    << "Unrefracted_RA_deg "   + to_string(headerMap["TELRA"] + conf.dRA*factor) + "\n"
-            << "Unrefracted_Dec_deg "  + to_string(headerMap["TELDEC"]+ conf.dDEC) 		+ "\n"
-            << "Unrefracted_Azimuth "  + to_string(headerMap["AZ"])            					+ "\n"
-            << "Unrefracted_Altitude " + to_string(90.0-headerMap["ZD"])						+ "\n"
-            << "Opsim_rotskypos "      + to_string(conf.rotation) 								+ "\n"
-            << "Opsim_rawseeing "	   + to_string(conf.seeing)   								+ "\n"
-            << "SIM_VISTIME " 		   + to_string(headerMap["EXPTIME"]) 						+ "\n"
+	file    << "Unrefracted_RA_deg "   + to_string(headerMap["TELRA"] + dRA ) + "\n"
+            << "Unrefracted_Dec_deg "  + to_string(headerMap["TELDEC"]+ dDEC) + "\n"
+            << "Unrefracted_Azimuth "  + to_string(headerMap["AZ"])           + "\n"
+            << "Unrefracted_Altitude " + to_string(90.0-headerMap["ZD"])	  + "\n"
+            << "Opsim_rotskypos "      + to_string(conf.dROT) 			  	  + "\n"
+            << "Opsim_rawseeing "	   + to_string(conf.seeing)   			  + "\n"
+            << "SIM_VISTIME " 		   + to_string(headerMap["EXPTIME"]) 	  + "\n"
             << "Opsim_rottelpos 0 \n" 
 			<<"Opsim_moondec -90 \n" 
 			<<"Opsim_moonra 180 \n" 
